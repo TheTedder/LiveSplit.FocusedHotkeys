@@ -18,7 +18,7 @@ namespace LiveSplit.FocusedHotkeys
         public bool Enabled { get; protected set; }
         public FocusedHotkeysSettings Settings { get; set; }
 
-        const int UPDATE_INTERVAL = 50; // minimum interval between updates in milliseconds
+        const int UPDATE_INTERVAL = 100; // minimum interval between updates in milliseconds
 
         bool _prevHotkeysEnabled;
         readonly Stopwatch _stopWatch;
