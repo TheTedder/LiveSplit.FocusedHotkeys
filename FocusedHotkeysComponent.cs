@@ -23,6 +23,8 @@ namespace LiveSplit.FocusedHotkeys
         bool _prevHotkeysEnabled;
         readonly Stopwatch _stopWatch;
 
+        public StringBuilder titleBuilder = new StringBuilder(256);
+
         public FocusedHotkeysComponent(LiveSplitState state)
         {
             Settings = new FocusedHotkeysSettings();
@@ -67,38 +69,32 @@ namespace LiveSplit.FocusedHotkeys
 
         bool IsFocused()
         {
-            var processName = GetActiveWindowProcess().ProcessName;
-            var windowTitle = GetActiveWindowTitle();
+            StringComparison comparer = Settings.MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
-            if (!Settings.MatchCase)
-            {
-                processName = processName.ToLower();
-                windowTitle = windowTitle.ToLower();
-            }
+            var window = GetForegroundWindow();
+            GetWindowThreadProcessId(window, out uint pid);
+            var process = Process.GetProcessById((int)pid);
+            var result = GetWindowText(window.ToInt32(), titleBuilder, 256);
+            var title = titleBuilder.ToString();
 
             return Settings.ProgramList.Any(s =>
             {
-                string title = Settings.MatchCase ? s.Title : s.Title.ToLower();
+                switch(s.Type)
+                {
+                    case TitleType.ProcessName:
+                        return s.Title.Equals(process.ProcessName, comparer);
 
-                return (s.Type == TitleType.ProcessName && title == processName)
-                    || (s.Type == TitleType.WindowTitle && title == windowTitle);
+                    case TitleType.WindowTitle:
+                        /*
+                         * If the result is zero, then the call to GetWindowTextW() failed, and we should just return false.
+                         * -Ted
+                         */
+                        return result != 0 && s.Title.Equals(title, comparer);
+                        
+                    default:
+                        return false;
+                }
             });
-        }
-
-        static Process GetActiveWindowProcess()
-        {
-            uint pid = 0;
-            GetWindowThreadProcessId(GetForegroundWindow(), out pid);
-
-            return Process.GetProcessById((int)pid);
-        }
-
-        static string GetActiveWindowTitle()
-        {
-            StringBuilder title = new StringBuilder(256);
-            GetWindowText(GetForegroundWindow().ToInt32(), title, 256);
-
-            return title.ToString();
         }
 
         public override XmlNode GetSettings(XmlDocument document) => Settings.GetSettings(document);
