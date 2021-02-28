@@ -107,6 +107,9 @@ namespace LiveSplit.FocusedHotkeys
 
         public override void SetSettings(XmlNode settings) => Settings.SetSettings(settings);
 
-        public override void Dispose() { }
+        public override void Dispose()
+        {
+            Settings.Dispose();
+        }
     }
 }
