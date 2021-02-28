@@ -96,7 +96,7 @@ namespace LiveSplit.FocusedHotkeys
         static string GetActiveWindowTitle()
         {
             StringBuilder title = new StringBuilder(256);
-            GetWindowText((int)GetForegroundWindow(), title, 256);
+            GetWindowText(GetForegroundWindow().ToInt32(), title, 256);
 
             return title.ToString();
         }
