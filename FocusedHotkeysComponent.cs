@@ -69,11 +69,10 @@ namespace LiveSplit.FocusedHotkeys
 
         bool IsFocused()
         {
-            StringComparison comparer = Settings.MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-
+            var comparer = Settings.MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
             var window = GetForegroundWindow();
             GetWindowThreadProcessId(window, out uint pid);
-            var process = Process.GetProcessById((int)pid);
+            var processName = Process.GetProcessById((int)pid).ProcessName;
             var result = GetWindowText(window.ToInt32(), titleBuilder, 256);
             var title = titleBuilder.ToString();
 
@@ -82,7 +81,7 @@ namespace LiveSplit.FocusedHotkeys
                 switch(s.Type)
                 {
                     case TitleType.ProcessName:
-                        return s.Title.Equals(process.ProcessName, comparer);
+                        return s.Title.Equals(processName, comparer);
 
                     case TitleType.WindowTitle:
                         /*
